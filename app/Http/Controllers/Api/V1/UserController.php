@@ -20,14 +20,14 @@ class UserController extends Controller
         if ($validator->fails()) {
             return response()->json([
                 'status' => 'Некорректные параметры запроса',
-                'errors' => $validator->errors()
+                'errors' => $validator->errors(),
             ], 400); // 400 не удалось обработать инструкции содержимого
         }
 
         if (User::where('username', $request->username)->exists()) {
             return response()->json([
                 'status' => 'error',
-                'message' => 'Пользователь с таким именем уже существует'
+                'message' => 'Пользователь с таким именем уже существует',
             ], 409); // 409 конфликт запроса
         }
 
@@ -37,15 +37,15 @@ class UserController extends Controller
             return response()->json([
                 'status' => 'Пользователь успешно создан',
                 'user' => [
-                    'id' => (int)$user->id,
+                    'id' => (int) $user->id,
                     'username' => $user->username,
-                ]
+                ],
             ], 201); // 201 Создан
         } catch (\Exception $e) {
             return response()->json([
                 'status' => 'error',
                 'message' => 'Internal Server Error',
-                'error' => $e->getMessage()
+                'error' => $e->getMessage(),
             ], 500); // 500 внутренняя ошибка сервера
         }
     }
@@ -53,13 +53,13 @@ class UserController extends Controller
     public function addScore(Request $request, $userId): JsonResponse
     {
         $validator = Validator::make($request->all(), [
-            'points' => 'required|integer|between:1,10000'
+            'points' => 'required|integer|between:1,10000',
         ]);
 
         if ($validator->fails()) {
             return response()->json([
                 'status' => 'error',
-                'message' => 'Некорректные параметры запроса'
+                'message' => 'Некорректные параметры запроса',
             ], 400);
         }
 
@@ -67,7 +67,7 @@ class UserController extends Controller
             $user = User::findOrFail($userId);
 
             ScoreLog::create([
-                'user_id' => (int)$user->id,
+                'user_id' => (int) $user->id,
                 'points' => $request->points,
             ]);
 
@@ -76,14 +76,14 @@ class UserController extends Controller
             return response()->json([
                 'status' => 'success',
                 'message' => 'Очки успешно добавлены',
-                'user_id' => (int)$userId,
-                'new_total_score' => $user->score
+                'user_id' => (int) $userId,
+                'new_total_score' => $user->score,
             ], 200);
         } catch (\Exception $e) {
 
             return response()->json([
                 'status' => 'Некорректные параметры запроса',
-                'error' => $e->getMessage()
+                'error' => $e->getMessage(),
             ], 400); // 400 не удалось обработать инструкции содержимого
         }
     }
