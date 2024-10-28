@@ -3,7 +3,6 @@
 namespace App\Http\Controllers\Api\V1;
 
 use App\Http\Controllers\Controller;
-use App\Models\ScoreLog;
 use App\Providers\LeaderboardService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -42,17 +41,18 @@ class LeaderboardController extends Controller
             return $validationResponse;
         }
 
-        if (! ScoreLog::find($userId)) {
+        if (! $this->leaderboardService->checkUser($userId)) {
             return response()->json([
-                'Status' => 'Not Found',
-                'Message' => 'Пользователь не найден',
+                'Errors' => 'Пользователь не найден',
             ], 404);
         }
         $rank = $this->leaderboardService->getUserRank($userId, $period);
 
         return response()->json([
-            'user_id' => $userId,
-            'rank' => $rank,
+            'user_id' => (int) $rank['user_id'],
+            'period' => $period,
+            'score' => $rank['score'],
+            'rank' => $rank['rank'],
         ]);
     }
 
@@ -65,7 +65,6 @@ class LeaderboardController extends Controller
         if ($validator->fails()) {
 
             return response()->json([
-                'Status' => 'Bad Request',
                 'Errors' => 'Некорректные параметры запроса',
             ], 400);
         }

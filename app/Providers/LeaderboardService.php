@@ -3,6 +3,7 @@
 namespace App\Providers;
 
 use App\Models\ScoreLog;
+use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\ServiceProvider;
@@ -20,9 +21,12 @@ class LeaderboardService extends ServiceProvider
             ->limit(10)
             ->get()
             ->map(function ($log, $index) {
+                $user = User::find($log->user_id);
+
                 return [
                     'position' => $index + 1,
                     'user_id' => $log->user_id,
+                    'username' => $user->username ?? 'Unknown',
                     'score' => (int) $log->total_points,
                 ];
             });
@@ -47,6 +51,11 @@ class LeaderboardService extends ServiceProvider
             'score' => (int) $userScore,
             'rank' => $rank,
         ];
+    }
+
+    public function checkUser($userId)
+    {
+        return DB::table('score_logs')->where('user_id', $userId)->first();
     }
 
     private function getStartDate($period): Carbon

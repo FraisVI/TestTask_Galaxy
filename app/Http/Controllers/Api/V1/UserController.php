@@ -25,20 +25,16 @@ class UserController extends Controller
         ]);
         if ($validator->fails()) {
             return response()->json([
-                'Status' => 'Некорректные параметры запроса',
-                'Message' => $validator->messages()->first(),
+                'Errors' => $validator->messages()->first(), //не задан шаблон для более точного описания ошибки
             ], 400);
         } elseif (User::where('username', $request->username)->exists()) {
             return response()->json([
-                'Status' => 'Conflict',
-                'Message' => 'Пользователь с таким именем уже существует',
+                'Errors' => 'Пользователь с таким именем уже существует',
             ], 409);
         }
         $user = $this->userService->createUser($request->only('username'));
 
         return response()->json([
-            'Status' => 'Created',
-            'Message' => 'Пользователь успешно создан',
             'user' => [
                 'id' => (int) $user->id,
                 'username' => $user->username,
@@ -53,7 +49,6 @@ class UserController extends Controller
         ]);
         if ($validator->fails()) {
             return response()->json([
-                'Status' => 'Bad Request',
                 'Errors' => 'Некорректные параметры запроса',
             ], 400);
         }
@@ -61,14 +56,11 @@ class UserController extends Controller
 
         if (! $scoreLog) {
             return response()->json([
-                'Status' => 'Not Found',
-                'Message' => 'Пользователь не найден',
+                'Errors' => 'Пользователь не найден',
             ], 404);
         }
 
         return response()->json([
-            'Status' => 'OK',
-            'Message' => 'Очки успешно добавлены',
             'user_id' => (int) $userId,
             'new_total_score' => $scoreLog,
         ], 200);
