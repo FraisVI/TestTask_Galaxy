@@ -18,7 +18,14 @@ class LeaderboardService extends ServiceProvider
             ->groupBy('user_id')
             ->orderByDesc('total_points')
             ->limit(10)
-            ->get();
+            ->get()
+            ->map(function ($log, $index) {
+                return [
+                    'position' => $index + 1,
+                    'user_id' => $log->user_id,
+                    'score' => (int) $log->total_points,
+                ];
+            });
     }
 
     public function getUserRank($userId, $period = 'day')
@@ -28,11 +35,18 @@ class LeaderboardService extends ServiceProvider
             ->where('created_at', '>=', $startDate)
             ->sum('points');
 
-        return ScoreLog::select('user_id', DB::raw('SUM(points) as total_points'))
-            ->where('created_at', '>=', $startDate)
-            ->groupBy('user_id')
-            ->having('total_points', '>', $userScore)
-            ->count() + 1;
+        $rank = ScoreLog::select('user_id', DB::raw('SUM(points) as total_points'))
+                ->where('created_at', '>=', $startDate)
+                ->groupBy('user_id')
+                ->having('total_points', '>', $userScore)
+                ->count() + 1;
+
+        return [
+            'user_id' => $userId,
+            'period' => $period,
+            'score' => (int)$userScore,
+            'rank' => $rank,
+        ];
     }
 
     private function getStartDate($period): Carbon
