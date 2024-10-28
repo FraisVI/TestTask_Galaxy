@@ -31,12 +31,12 @@ class LeaderboardController extends Controller
                     'position' => $index + 1,
                     'user_id' => $log->user_id,
                     'username' => $user->username,
-                    'score' => (int)$log->total_points,
+                    'score' => (int) $log->total_points,
                 ];
             });
 
         return response()->json([
-            'period' => $period,
+            'period' => $startDate,
             'top' => $topUsers,
         ], 200);
     }
@@ -52,25 +52,25 @@ class LeaderboardController extends Controller
             ->sum('points');
 
         $rank = ScoreLog::select('user_id', DB::raw('SUM(points) as total_points'))
-                ->where('created_at', '>=', $startDate)
-                ->groupBy('user_id')
-                ->having('total_points', '>', $userScore)
-                ->count() + 1;
+            ->where('created_at', '>=', $period)
+            ->groupBy('user_id')
+            ->having('total_points', '>', $userScore)
+            ->count() + 1;
 
         return response()->json([
-            'user_id' => (int)$userId,
+            'user_id' => (int) $userId,
             'period' => $period,
-            'score' => (int)$userScore,
-            'rank' => $rank
+            'score' => (int) $userScore,
+            'rank' => $rank,
         ]);
     }
 
     private function validatePeriod($period): void
     {
-        if (!in_array($period, ['day', 'week', 'month'])) {
+        if (! in_array($period, ['day', 'week', 'month'])) {
             response()->json([
                 'status' => 'error',
-                'message' => 'Некорректные параметры запроса'
+                'message' => 'Некорректные параметры запроса',
             ], 400);
         }
     }
