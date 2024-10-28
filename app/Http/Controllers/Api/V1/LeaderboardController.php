@@ -3,84 +3,49 @@
 namespace App\Http\Controllers\Api\V1;
 
 use App\Http\Controllers\Controller;
-use App\Models\ScoreLog;
-use App\Models\User;
-use Carbon\Carbon;
+use App\Providers\LeaderboardService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Validator;
 
 class LeaderboardController extends Controller
 {
+    protected LeaderboardService $leaderboardService;
+
+    public function __construct(LeaderboardService $leaderboardService)
+    {
+        $this->leaderboardService = $leaderboardService;
+    }
+
     public function getTopUsers(Request $request): JsonResponse
     {
         $period = $request->input('period', 'day');
         $this->validatePeriod($period);
-        $startDate = $this->getStartDate($period);
+        $topUsers = $this->leaderboardService->getTopUsers($period);
 
-        $topUsers = ScoreLog::select('user_id', DB::raw('SUM(points) as total_points'))
-            ->where('created_at', '>=', $startDate)
-            ->groupBy('user_id')
-            ->orderByDesc('total_points')
-            ->limit(10)
-            ->get()
-            ->map(function ($log, $index) {
-                $user = User::find($log->user_id);
-
-                return [
-                    'position' => $index + 1,
-                    'user_id' => $log->user_id,
-                    'username' => $user->username,
-                    'score' => (int) $log->total_points,
-                ];
-            });
-
-        return response()->json([
-            'period' => $startDate,
-            'top' => $topUsers,
-        ], 200);
+        return response()->json($topUsers);
     }
 
     public function getUserRank(Request $request, $userId): JsonResponse
     {
         $period = $request->input('period', 'day');
-        $this->validatePeriod($period);
-        $startDate = $this->getStartDate($period);
-
-        $userScore = ScoreLog::where('user_id', $userId)
-            ->where('created_at', '>=', $startDate)
-            ->sum('points');
-
-        $rank = ScoreLog::select('user_id', DB::raw('SUM(points) as total_points'))
-            ->where('created_at', '>=', $period)
-            ->groupBy('user_id')
-            ->having('total_points', '>', $userScore)
-            ->count() + 1;
+        $rank = $this->leaderboardService->getUserRank($userId, $period);
 
         return response()->json([
-            'user_id' => (int) $userId,
-            'period' => $period,
-            'score' => (int) $userScore,
+            'user_id' => $userId,
             'rank' => $rank,
         ]);
     }
-
-    private function validatePeriod($period): void
+    private function validatePeriod(Request $request)
     {
-        if (! in_array($period, ['day', 'week', 'month'])) {
-            response()->json([
-                'status' => 'error',
-                'message' => 'Некорректные параметры запроса',
-            ], 400);
+        $validator = Validator::make($request->all(), [
+            'period' => 'required|string|in:day,week,month',
+        ]);
+        if ($validator->fails()) {
+            return response()->json([
+                'status' => 'Некорректные параметры запроса',
+                'errors' => $validator->errors(),
+            ], 400); // 400 не удалось обработать инструкции содержимого
         }
-    }
-
-    private function getStartDate($period): Carbon
-    {
-        return match ($period) {
-            'week' => Carbon::now()->subWeek(),
-            'month' => Carbon::now()->subMonth(),
-            default => Carbon::now()->subDay(),
-        };
     }
 }

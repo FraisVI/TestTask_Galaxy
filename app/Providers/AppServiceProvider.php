@@ -11,7 +11,15 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        //
+        // Регистрация UserService
+        $this->app->singleton(UserService::class, function ($app) {
+            return new UserService($app);
+        });
+
+        // Регистрация LeaderboardService
+        $this->app->singleton(LeaderboardService::class, function ($app) {
+            return new LeaderboardService($app);
+        });
     }
 
     /**
