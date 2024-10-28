@@ -36,15 +36,15 @@ class LeaderboardService extends ServiceProvider
             ->sum('points');
 
         $rank = ScoreLog::select('user_id', DB::raw('SUM(points) as total_points'))
-                ->where('created_at', '>=', $startDate)
-                ->groupBy('user_id')
-                ->having('total_points', '>', $userScore)
-                ->count() + 1;
+            ->where('created_at', '>=', $startDate)
+            ->groupBy('user_id')
+            ->having('total_points', '>', $userScore)
+            ->count() + 1;
 
         return [
             'user_id' => $userId,
             'period' => $period,
-            'score' => (int)$userScore,
+            'score' => (int) $userScore,
             'rank' => $rank,
         ];
     }

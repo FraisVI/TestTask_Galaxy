@@ -27,12 +27,12 @@ class UserController extends Controller
             return response()->json([
                 'Status' => 'Некорректные параметры запроса',
                 'Message' => $validator->messages()->first(),
-            ], 400); // 400 не удалось обработать инструкции содержимого
+            ], 400);
         } elseif (User::where('username', $request->username)->exists()) {
             return response()->json([
                 'Status' => 'Conflict',
                 'Message' => 'Пользователь с таким именем уже существует',
-            ], 409); // 409 конфликт запроса
+            ], 409);
         }
         $user = $this->userService->createUser($request->only('username'));
 
@@ -43,7 +43,7 @@ class UserController extends Controller
                 'id' => (int) $user->id,
                 'username' => $user->username,
             ],
-        ], 201); // 201 успешное создание
+        ], 201);
     }
 
     public function addScoreToUser(Request $request, $userId): JsonResponse

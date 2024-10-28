@@ -5,7 +5,6 @@ namespace App\Http\Controllers\Api\V1;
 use App\Http\Controllers\Controller;
 use App\Models\ScoreLog;
 use App\Providers\LeaderboardService;
-use Carbon\Carbon;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
@@ -56,7 +55,8 @@ class LeaderboardController extends Controller
             'rank' => $rank,
         ]);
     }
-    private function validatePeriod($period)
+
+    private function validatePeriod($period): ?JsonResponse
     {
         $validator = Validator::make(['period' => $period], [
             'period' => 'required|string|in:day,week,month',
@@ -71,13 +71,5 @@ class LeaderboardController extends Controller
         }
 
         return null;
-    }
-    private function getStartDate($period): Carbon
-    {
-        return match ($period) {
-            'week' => Carbon::now()->subWeek(),
-            'month' => Carbon::now()->subMonth(),
-            default => Carbon::now()->subDay(),
-        };
     }
 }
