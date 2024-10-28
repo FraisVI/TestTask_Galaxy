@@ -13,16 +13,18 @@ class UserService extends ServiceProvider
         return User::create(['username' => $data['username']]);
     }
 
-    public function addScore($userId, array $data)
+    public function addScore($userId, $points)
     {
         $user = User::find($userId);
         if (! $user) {
             return null;
         }
-
-        return ScoreLog::create([
+        ScoreLog::create([
             'user_id' => $user->id,
-            'points' => $data['points'],
+            'points' => $points,
         ]);
+        $user->increment('total_score', $points);
+
+        return $user->total_score;
     }
 }

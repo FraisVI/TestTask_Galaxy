@@ -15,8 +15,7 @@ return new class extends Migration
             $table->id();
             $table->foreignId('user_id')->constrained()->onDelete('cascade');
             $table->unsignedBigInteger('points');
-            $table->timestamps();
-
+            $table->time('created_at')->default(now());
         });
     }
 
