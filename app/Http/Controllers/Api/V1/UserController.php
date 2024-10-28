@@ -27,7 +27,7 @@ class UserController extends Controller
             return response()->json([
                 'Errors' => $validator->messages()->first(), //не задан шаблон для более точного описания ошибки
             ], 400);
-        } elseif (User::where('username', $request->username)->exists()) {
+        } elseif ($this->userService->checkDuplicateUser($request->username)) {
             return response()->json([
                 'Errors' => 'Пользователь с таким именем уже существует',
             ], 409);

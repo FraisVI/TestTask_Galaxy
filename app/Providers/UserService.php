@@ -27,4 +27,9 @@ class UserService extends ServiceProvider
 
         return $user->total_score;
     }
+
+    public function checkDuplicateUser($username)
+    {
+        return User::where('username', $username)->exists();
+    }
 }
