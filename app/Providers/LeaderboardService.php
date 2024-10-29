@@ -53,9 +53,9 @@ class LeaderboardService extends ServiceProvider
         ];
     }
 
-    public function checkUser($userId)
+    protected function checkUser($userId)
     {
-        return DB::table('score_logs')->where('user_id', $userId)->first();
+        return ScoreLog::where('user_id', $userId)->exists();
     }
 
     private function getStartDate($period): Carbon
