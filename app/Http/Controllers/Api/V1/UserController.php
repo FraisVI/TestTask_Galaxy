@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api\V1;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\StoreUserRequest;
 use App\Providers\UserService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -17,7 +18,7 @@ class UserController extends Controller
         $this->userService = $userService;
     }
 
-    public function createUser(Request $request): JsonResponse
+    public function createUser(StoreUserRequest $request): JsonResponse
     {
         $validator = Validator::make($request->all(), [
             'username' => 'required|string|between:3,50|regex:/^[a-zA-Z0-9_]+$/',

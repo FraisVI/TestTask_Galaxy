@@ -23,7 +23,8 @@ class StoreScoreLogsRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'user_id' => ['required', 'integer', 'exists:users,id'],
+            'score' => ['required', 'integer'],
+            'user_id' => ['required', 'integer'],
         ];
     }
 }
